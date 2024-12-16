@@ -4,6 +4,8 @@ package com.desafio.devSuperior.dto;
 import com.desafio.devSuperior.entities.Client;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
 
@@ -11,12 +13,14 @@ public class ClientDTO {
 
     private Long id;
 
+    @NotEmpty(message = "Campo não pode ser vazio")
     private String name;
 
     private String cpf;
 
     private Double income;
 
+    @PastOrPresent(message = "Não pode ser data futura")
     private LocalDate birthDate;
 
     private Integer children;

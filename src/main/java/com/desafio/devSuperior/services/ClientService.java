@@ -3,6 +3,8 @@ package com.desafio.devSuperior.services;
 import com.desafio.devSuperior.dto.ClientDTO;
 import com.desafio.devSuperior.entities.Client;
 import com.desafio.devSuperior.repositories.ClientRepository;
+import com.desafio.devSuperior.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +20,8 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id){
-        Client client = repository.findById(id).get();
+        Client client = repository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Recurso não encontrado"));
         return new ClientDTO(client);
     }
 
@@ -39,15 +42,24 @@ public class ClientService {
 
     @Transactional
     public ClientDTO update(Long id, ClientDTO dto){
-        Client entity = repository.getReferenceById(id);
-        copyDtoEntity(dto, entity);
-        entity = repository.save(entity);
+        try {
+            Client entity = repository.getReferenceById(id);
+            copyDtoEntity(dto, entity);
+            entity = repository.save(entity);
 
-        return new ClientDTO(entity);
+            return new ClientDTO(entity);
+        }
+        catch (EntityNotFoundException e){
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
+
     }
 
     @Transactional
     public void delete(Long id){
+        if (!repository.existsById(id)){
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
         repository.deleteById(id);
     }
 
